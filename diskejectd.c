@@ -1,4 +1,8 @@
-// Mount Block Daemon
+// Disk Eject Daemon
+//
+// (c) 2014 Andre Richter www.andre-richter.com
+//
+// A fork of: Mount Block Daemon
 //
 // (c) 2012 Adam Strzelecki nanoant.com
 //
@@ -6,7 +10,7 @@
 // http://superuser.com/questions/336455/mac-lion-fstab-is-deprecated-so-what-replaces-it-to-prevent-a-partition-from-m/336474#336474
 //
 // Compile with:
-// cc mountblockd.c -g -o mountblockd -framework Foundation -framework DiskArbitration
+// cc diskejectd.c -g -o mountblockd -framework Foundation -framework DiskArbitration
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <DiskArbitration/DiskArbitration.h>
@@ -16,35 +20,37 @@ int nameCount = 0;
 bool run = true;
 bool quiet = false;
 
-DADissenterRef BlockMount(DADiskRef disk, void *context)
+void DiskEjectCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
 {
+    if (dissenter) {
+        if(!quiet) fprintf(stderr, "Ejected `%s'\n", DADiskGetBSDName(disk));
+    } else {
+        if(!quiet) fprintf(stderr, "Error ejecting: %s\n", DADiskGetBSDName(disk));
+    }
+}
+
+void DiskClaimCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
+{
+    if (!dissenter) {
+        DADiskEject(disk, kDADiskEjectOptionDefault, DiskEjectCallback, NULL);        
+    } else {
+        if(!quiet) fprintf(stderr, "Error claiming disk %s!\n", DADiskGetBSDName(disk));
+    }
+}
+
+void BlockMount(DADiskRef disk, void *context)
+{    
 	CFDictionaryRef description = DADiskCopyDescription(disk);
-	CFStringRef name = description ? CFDictionaryGetValue(description, kDADiskDescriptionVolumeNameKey) : NULL;
-	DADissenterRef dissenter = NULL;
-	bool block = false;
-	char *str = NULL;
-	if (name) {
-		int i;
-		CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(name), kCFStringEncodingUTF8);
-		str = alloca(length + 1);
-		CFStringGetCString(name, str, length, kCFStringEncodingUTF8);
-		for (i = 0; i < nameCount; i++) {
-			if (CFEqual(name, names[i])) {
-				block = true;
-				break;
-			}
-		}
-	}
-	if (block) {
-		dissenter = DADissenterCreate(kCFAllocatorDefault, kDAReturnNotPermitted, NULL);
-		if(!quiet) if(!quiet) fprintf(stderr, "BLOCKED volume `%s'\n", str);
-	} else {
-		if(!quiet) if(!quiet) fprintf(stderr, "allowed volume `%s'\n", str);
-	}
-	if (description) {
-		CFRelease(description);
-	}
-	return dissenter;
+    CFStringRef diskBSDName = description ? CFDictionaryGetValue(description, kDADiskDescriptionMediaBSDNameKey) : NULL;
+ 
+    if (diskBSDName) {
+           CFIndex diskBSDNameLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(diskBSDName), kCFStringEncodingUTF8);
+
+           for (int i = 0; i < nameCount; i++) {
+               if (CFEqual(diskBSDName, names[i]))
+                   DADiskClaim(disk, 0, 0, NULL, DiskClaimCallback, NULL);        
+           }
+       }
 }
 
 void signal_handler(int sig) {
@@ -73,7 +79,7 @@ void signal_handler(int sig) {
 
 int main(int argc, const char *argv[])
 {
-	int argi;
+	int argi, i;
 	bool useConsole;
 
 	for (argi = 1; argi < argc && argv[argi][0] == '-'; argi++) {
@@ -94,8 +100,8 @@ int main(int argc, const char *argv[])
 		fprintf(stderr, "failed to create Disk Arbitration session\n");
 	} else if (argc - argi <= 0) {
 		fprintf(stderr, "usage: %s [-quiet] <name> ...\n", argv[0]);
-	} else {
-		CFStringRef cfStringNames[argc - argi];
+	} else {        
+		CFStringRef cfStringNames[argc - argi];        
 		if(!quiet) fprintf(stderr, "blocking:\n");
 		for(nameCount = 0; nameCount < argc - argi; nameCount++) {
 			if(!quiet) fprintf(stderr, "(%d) `%s'\n", nameCount + 1, argv[nameCount + argi]);
@@ -104,9 +110,9 @@ int main(int argc, const char *argv[])
 						kCFStringEncodingUTF8,
 						kCFAllocatorNull);
 		}
-		names = cfStringNames;
+        names = cfStringNames;
 
-		DARegisterDiskMountApprovalCallback(session, NULL, BlockMount, NULL);
+        DARegisterDiskAppearedCallback(session, NULL, BlockMount, NULL);
 		DAApprovalSessionScheduleWithRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
 		while (run) {
@@ -114,7 +120,7 @@ int main(int argc, const char *argv[])
 		}
 
 		DAApprovalSessionUnscheduleFromRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-		DAUnregisterApprovalCallback(session, BlockMount, NULL);
+		DAUnregisterCallback(session, BlockMount, NULL);
 		CFRelease(session);
 	}
 	return 0;

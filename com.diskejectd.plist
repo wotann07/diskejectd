@@ -3,18 +3,18 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.nanoant.mountblockd</string>
+	<string>com.diskejectd</string>
 	<key>Program</key>
-	<string>/usr/local/sbin/mountblockd</string>
+	<string>/usr/local/sbin/diskejectd</string>
     <!-- <key>StandardOutPath</key>
-    <string>/var/log/mountblockd.log</string>
+    <string>/var/log/diskejectd.log</string>
     <key>StandardErrorPath</key>
-    <string>/var/log/mountblockd.log</string> -->
+    <string>/var/log/diskejectd.log</string> -->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/local/sbin/mountblockd</string>
+		<string>/usr/local/sbin/diskejectd</string>
 		<!-- <string>-quiet</string> -->
-		<string>Blocked Volume Name 1</string>
+		<string>Blocked Disk Name 1</string>
 	</array>
 	<key>KeepAlive</key>
 	<true/>

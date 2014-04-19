@@ -1,11 +1,15 @@
-ORG  := com.nanoant
-NAME := mountblockd
+ORG  := com
+NAME := diskejectd
 PREFIX := /usr/local
 
 all: $(NAME)
 
 $(NAME): $(NAME).c
 	$(CC) $(NAME).c -g -o $(NAME) -framework Foundation -framework DiskArbitration
+	
+clean:
+	rm -rf diskejectd.dSYM
+	rm diskejectd
 
 install: $(NAME) $(ORG).$(NAME).plist
 	install -d $(PREFIX)/sbin
