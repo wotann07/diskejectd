@@ -38,7 +38,7 @@ void DiskClaimCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
     }
 }
 
-void BlockMount(DADiskRef disk, void *context)
+void DiskAppearedCallback(DADiskRef disk, void *context)
 {    
 	CFDictionaryRef description = DADiskCopyDescription(disk);
     CFStringRef diskBSDName = description ? CFDictionaryGetValue(description, kDADiskDescriptionMediaBSDNameKey) : NULL;
@@ -79,7 +79,7 @@ void signal_handler(int sig) {
 
 int main(int argc, const char *argv[])
 {
-	int argi, i;
+	int argi;
 	bool useConsole;
 
 	for (argi = 1; argi < argc && argv[argi][0] == '-'; argi++) {
@@ -112,7 +112,7 @@ int main(int argc, const char *argv[])
 		}
         names = cfStringNames;
 
-        DARegisterDiskAppearedCallback(session, NULL, BlockMount, NULL);
+        DARegisterDiskAppearedCallback(session, NULL, DiskAppearedCallback, NULL);
 		DAApprovalSessionScheduleWithRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
 		while (run) {
@@ -120,7 +120,7 @@ int main(int argc, const char *argv[])
 		}
 
 		DAApprovalSessionUnscheduleFromRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-		DAUnregisterCallback(session, BlockMount, NULL);
+		DAUnregisterCallback(session, DiskAppearedCallback, NULL);
 		CFRelease(session);
 	}
 	return 0;
