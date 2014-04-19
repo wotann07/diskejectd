@@ -1,4 +1,4 @@
-mountblockd
+diskejectd
 ===========
 
 This is Launch Daemon blocking disks specified in `<ProgramArguments>` of `com.diskejectd.plist`.
