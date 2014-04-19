@@ -27,6 +27,7 @@ License
 -------
 
 Copyright (c) 2012 Adam Strzelecki
+
 Copyright (c) 2014 Andre Richter
 
 Permission is hereby granted, free of charge, to any person obtaining
