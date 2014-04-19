@@ -22,35 +22,35 @@ bool quiet = false;
 
 void DiskEjectCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
 {
-    if (dissenter) {
-        if(!quiet) fprintf(stderr, "Ejected `%s'\n", DADiskGetBSDName(disk));
-    } else {
-        if(!quiet) fprintf(stderr, "Error ejecting: %s\n", DADiskGetBSDName(disk));
-    }
+	if (dissenter) {
+		if(!quiet) fprintf(stderr, "Ejected `%s'\n", DADiskGetBSDName(disk));
+	} else {
+		if(!quiet) fprintf(stderr, "Error ejecting: %s\n", DADiskGetBSDName(disk));
+	}
 }
 
 void DiskClaimCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
 {
-    if (!dissenter) {
-        DADiskEject(disk, kDADiskEjectOptionDefault, DiskEjectCallback, NULL);        
-    } else {
-        if(!quiet) fprintf(stderr, "Error claiming disk %s!\n", DADiskGetBSDName(disk));
-    }
+	if (!dissenter) {
+		DADiskEject(disk, kDADiskEjectOptionDefault, DiskEjectCallback, NULL);        
+	} else {
+		if(!quiet) fprintf(stderr, "Error claiming disk %s!\n", DADiskGetBSDName(disk));
+	}
 }
 
 void DiskAppearedCallback(DADiskRef disk, void *context)
 {    
 	CFDictionaryRef description = DADiskCopyDescription(disk);
-    CFStringRef diskBSDName = description ? CFDictionaryGetValue(description, kDADiskDescriptionMediaBSDNameKey) : NULL;
+	CFStringRef diskBSDName = description ? CFDictionaryGetValue(description, kDADiskDescriptionMediaBSDNameKey) : NULL;
  
-    if (diskBSDName) {
-           CFIndex diskBSDNameLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(diskBSDName), kCFStringEncodingUTF8);
+	if (diskBSDName) {
+		CFIndex diskBSDNameLength = CFStringGetMaximumSizeForEncoding(CFStringGetLength(diskBSDName), kCFStringEncodingUTF8);
 
-           for (int i = 0; i < nameCount; i++) {
-               if (CFEqual(diskBSDName, names[i]))
-                   DADiskClaim(disk, 0, 0, NULL, DiskClaimCallback, NULL);        
-           }
-       }
+		for (int i = 0; i < nameCount; i++) {
+			if (CFEqual(diskBSDName, names[i]))
+				DADiskClaim(disk, 0, 0, NULL, DiskClaimCallback, NULL);        
+		}
+	}
 }
 
 void signal_handler(int sig) {
@@ -106,13 +106,13 @@ int main(int argc, const char *argv[])
 		for(nameCount = 0; nameCount < argc - argi; nameCount++) {
 			if(!quiet) fprintf(stderr, "(%d) `%s'\n", nameCount + 1, argv[nameCount + argi]);
 			cfStringNames[nameCount] = CFStringCreateWithCStringNoCopy(NULL, 
-						argv[nameCount + argi],
-						kCFStringEncodingUTF8,
-						kCFAllocatorNull);
+										   argv[nameCount + argi],
+										   kCFStringEncodingUTF8,
+										   kCFAllocatorNull);
 		}
-        names = cfStringNames;
+		names = cfStringNames;
 
-        DARegisterDiskAppearedCallback(session, NULL, DiskAppearedCallback, NULL);
+		DARegisterDiskAppearedCallback(session, NULL, DiskAppearedCallback, NULL);
 		DAApprovalSessionScheduleWithRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
 		while (run) {
