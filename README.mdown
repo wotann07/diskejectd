@@ -1,7 +1,7 @@
 diskejectd
 ===========
 
-This is Launch Daemon blocking disks specified in `<ProgramArguments>` of `com.diskejectd.plist`.
+This is a Launch Daemon blocking disks specified in `<ProgramArguments>` of `com.diskejectd.plist`.
 
 Based on original code published at:
 [superuser.com](http://superuser.com/questions/336455/mac-lion-fstab-is-deprecated-so-what-replaces-it-to-prevent-a-partition-from-m/336474#336474)
