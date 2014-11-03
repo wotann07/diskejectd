@@ -2,6 +2,7 @@ diskejectd
 ===========
 
 This is a Launch Daemon blocking disks specified in `<ProgramArguments>` of `com.diskejectd.plist`.
+It helps you to block/get rid of "the disk you inserted was not readable by this computer" error message in Mac OS X.
 
 Based on original code published at:
 [superuser.com](http://superuser.com/questions/336455/mac-lion-fstab-is-deprecated-so-what-replaces-it-to-prevent-a-partition-from-m/336474#336474)
