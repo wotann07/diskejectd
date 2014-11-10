@@ -12,10 +12,21 @@ Installation
 ------------
 
 1. Get the BSD Disk Name of the disk you want to block with `diskutil list`, e.g. `disk2s2`.
-2. Put disk names you want to block in `<ProgramArguments>` of `com.diskejectd.plist`.
-3. `make`
-4. `sudo make install`
-5. `sudo make start`
+2. Put disk names you want to block in `<ProgramArguments>` of `com.diskejectd.plist`. You can put as many disks in there as you like. Here's an example for blocking two disks: 
+```xml
+<key>ProgramArguments</key>
+<array>
+    <string>/usr/local/sbin/diskejectd</string>
+    <string>disk2s1</string>
+    <string>disk2s2</string>
+</array>
+```
+
+Finally, compile and install:
+
+1. `make`
+2. `sudo make install`
+3. `sudo make start`
 
 
 Removal
