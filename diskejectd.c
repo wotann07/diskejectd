@@ -22,7 +22,7 @@ bool quiet = false;
 
 void DiskEjectCallback(DADiskRef disk, DADissenterRef dissenter, void *context)
 {
-	if (dissenter) {
+	if (!dissenter) {
 		if(!quiet) fprintf(stderr, "Ejected `%s'\n", DADiskGetBSDName(disk));
 	} else {
 		if(!quiet) fprintf(stderr, "Error ejecting: %s\n", DADiskGetBSDName(disk));
